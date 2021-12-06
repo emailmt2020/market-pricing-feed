@@ -17,9 +17,12 @@ class CSVPriceTransformerTest {
     }
 
     @Test
+    void tesTransformPriceWithInvalidAttributeCount() {
+        assertThrows(RuntimeException.class, () -> transformer.transform("110, EUR/JPY,01-06-2020 12:01:02:110"));
+    }
+
+    @Test
     void tesTransformPriceWithInvalidFormat() {
-        assertThrows(RuntimeException.class, () -> {
-            transformer.transform("110, EUR/JPY,119.81,01-06-2020 12:01:02:110");
-        });
+        assertThrows(RuntimeException.class, () -> transformer.transform("110, EUR/JPY,,119.81,01-06-2020 12:01:02:110"));
     }
 }

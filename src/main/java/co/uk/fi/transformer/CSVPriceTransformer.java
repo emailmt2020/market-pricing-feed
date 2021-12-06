@@ -15,11 +15,15 @@ public class CSVPriceTransformer implements PriceTransformer {
     @Override
     public Price transform(String priceMessage) {
         String[] cols = priceMessage.split(",");
-        return Price.builder().tickId(cols[0].trim())
-                .instrumentName(cols[1].trim())
-                .bid(new BigDecimal(cols[2].trim()))
-                .ask(new BigDecimal(cols[3].trim()))
-                .timestamp(LocalDateTime.parse(cols[4].trim(), formatter)).build();
+        if(cols.length==5){
+            return Price.builder().tickId(cols[0].trim())
+                    .instrumentName(cols[1].trim())
+                    .bid(new BigDecimal(cols[2].trim()))
+                    .ask(new BigDecimal(cols[3].trim()))
+                    .timestamp(LocalDateTime.parse(cols[4].trim(), formatter)).build();
 
+        }else{
+            throw new RuntimeException("Unexpected number of attributes in Price message: " + priceMessage);
+        }
     }
 }
