@@ -18,16 +18,13 @@ public class PricingServiceImpl implements PricingService {
     ConcurrentMap<String, Price> priceMap = new ConcurrentHashMap<>();
 
     public void savePrice(Price price) {
-        priceMap.compute(price.getInstrumentName(), new BiFunction<String, Price, Price>() {
-            @Override
-            public Price apply(String s, Price oldPrice) {
-                if(Objects.isNull(oldPrice) || oldPrice.getTimestamp().compareTo(price.getTimestamp()) < 0){
-                    log.info("New Price Added for instrument {} with id {}", price.getInstrumentName(), price.getTickId());
-                    return price;
-                } else{
-                    log.info("New Price Discarded for instrument {} with id {}", price.getInstrumentName(), price.getTickId());
-                    return oldPrice;
-                }
+        priceMap.compute(price.getInstrumentName(), (instrumentName, oldPrice) -> {
+            if(Objects.isNull(oldPrice) || oldPrice.getTimestamp().compareTo(price.getTimestamp()) < 0){
+                log.info("New Price Added for instrument {} with id {}", price.getInstrumentName(), price.getTickId());
+                return price;
+            } else{
+                log.info("New Price Discarded for instrument {} with id {}", price.getInstrumentName(), price.getTickId());
+                return oldPrice;
             }
         });
     }

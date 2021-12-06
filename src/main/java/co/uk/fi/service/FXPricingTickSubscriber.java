@@ -1,5 +1,6 @@
 package co.uk.fi.service;
 
+import co.uk.fi.core.OrderBook;
 import co.uk.fi.domain.Price;
 import co.uk.fi.transformer.PriceTransformer;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ public class FXPricingTickSubscriber implements PricingTickSubscriber {
     @Autowired
     final PricingService pricingService;
     @Autowired
+    final OrderBook orderBook;
+    @Autowired
     final PriceTransformer priceTransformer;
 
     @Override
@@ -30,6 +33,8 @@ public class FXPricingTickSubscriber implements PricingTickSubscriber {
             supplyAsync(() -> priceTransformer.transform(priceLine))
                     .thenApply(p -> applyMargin(p))
                     .thenApply(p -> storePrice(p))
+                    //This is not in scope but I have added to provide solution for Best Bid and Best Ask if needed.
+                    .thenApply(p -> updateOrderBook(p))
                     .thenAccept(p -> publishPrice(p))
                     .exceptionally(ex -> {
                         log.error("Recovered from Exception: ", ex);
@@ -37,6 +42,11 @@ public class FXPricingTickSubscriber implements PricingTickSubscriber {
                     });
         }
         log.info("Price Message processed successfully");
+    }
+
+    private Price updateOrderBook(Price p) {
+        log.info("OrderBook update for instrument ID {}", p.getInstrumentName());
+        return p;
     }
 
     private Price storePrice(Price p) {
